@@ -9,21 +9,36 @@ from datetime import datetime
 from PIL import ImageGrab
 import os
 
-# Specify the directory where you want to save the screenshot
-directory = 'Screenshots'
-def screenshot(name,nameOfOffice,directory,date):
-    directory = directory +'/'+nameOfOffice+'/'+ date
+
+def extract_datee(date_str):
+    try:
+        date_str = date_str.split(',')[1].split(' ')[1]
+        return date_str
+    except ValueError:
+        print("returnd none")
+        return None
+    # Specify the directory where you want to save the screenshot
+directory = 'screenshots'
+def extract_numbers(input_string):
+    # Use regular expression to extract numbers
+    numbers = re.findall(r'\d+', input_string)
+    # Join the extracted numbers into a string
+    extracted = ''.join(numbers)
+    return extracted
+def screenshot(name,directory,date):
+    print(name)
+    directory = directory +'/'+ extract_datee(str(date))
     # Ensure the directory exists, create it if it doesn't
     if not os.path.exists(directory):
         os.makedirs(directory)
 
     # Take a screenshot of the entire screen
     screenshot = ImageGrab.grab()
-
+    print(directory)
     # Save the screenshot to the specified directory
-    file_path = os.path.join(directory, f"{name}.png")
+    file_path = directory + f"/{name}.png"
     screenshot.save(file_path)
-
+    return file_path
 
 # def sameItem():
 
@@ -47,12 +62,7 @@ def extract_date(driver):
     return date
 
 
-def extract_numbers(input_string):
-    # Use regular expression to extract numbers
-    numbers = re.findall(r'\d+', input_string)
-    # Join the extracted numbers into a string
-    extracted = ''.join(numbers)
-    return extracted
+
 
 def add0 (minute):
     if minute<10:
@@ -69,7 +79,7 @@ def click_button_with_date(date, driver,count):
     nameOfOffice = driver.find_element(By.XPATH,'/html/body/div[1]/div/div/div[2]/div/div/div[2]/div/div[5]/div[1]/div[2]/div[2]/div/div[1]/div/div/div[4]/h2/span').text
 
     print(nameOfOffice)
-    # nowDate = date #check row for if the button is working
+    nowDate = date #check row for if the button is working
     if date == nowDate:
         original_window = driver.current_window_handle
         # Find and click the button (replace XPATH_OF_THE_BUTTON with the actual XPath of the button)
@@ -87,23 +97,39 @@ def click_button_with_date(date, driver,count):
         sleep(6)
         driver.find_element(By.XPATH,'/html/body/div[6]/div[1]').click()
         sleep(1)
+        last_name = ''
+        name = ' '
+        file_path = ""
+        flag = True
         lowest_number = 10000000
-        try:
-            name = driver.find_element(By.XPATH, '/html/body/div[3]/div/div/div/div[1]/div[3]/div[8]/div[2]/div[1]').text
-        except NoSuchElementException:
-            name = "פריט יחיד"
-        print(name)
-        try:
-            while driver.find_element(By.XPATH, '/html/body/div[3]/div/div/div/div[1]/div[4]/div[6]/div[3]/div').text=="אין הצעות" :
-                number = int(extract_numbers(driver.find_element(By.XPATH, '/html/body/div[3]/div/div/div/div[1]/div[4]/div[6]/div[2]/div[1]').text))
-                if number<lowest_number:
-                    screenshot(str(count) +":"+ name,nameOfOffice,directory,date)
-                    lowest_number = number
-                sleep(30)
-        except NoSuchElementException:
-            print("Finished sale")
-            driver.close()
-            driver.switch_to.window(original_window)
+        while flag:
+            try:
+                while driver.find_element(By.XPATH, '/html/body/div[3]/div/div/div/div[1]/div[4]/div[5]/div[3]/div').text=="אין הצעות" :
+                    sleep(1)
+                    while driver.find_element(By.XPATH, '/html/body/div[3]/div/div/div/div[1]/div[4]/div[5]/div[2]/div[1]').text == "":
+                        print("sleeping...")
+                        sleep(0.5)
+                    try:
+                        name = driver.find_element(By.XPATH,'/html/body/div[3]/div/div/div/div[1]/div[3]/div[8]/div[2]/div[1]').text
+                    except NoSuchElementException:
+                        name = "1"
+                    number = int(extract_numbers(str(driver.find_element(By.XPATH, '/html/body/div[3]/div/div/div/div[1]/div[4]/div[5]/div[2]/div[1]').text)))
+                    last_name = name
+                    if number<lowest_number:
+                        file_path = screenshot(extract_numbers(name),directory,date)
+                        print("screenshot taken")
+                        lowest_number = number
+                    sleep(10)
+                if last_name == name:
+                    if os.path.exists(file_path):
+                        os.remove(file_path)
+                        print(f"File '{file_path}' deleted successfully.")
+
+            except NoSuchElementException:
+                print("Finished sale")
+                flag = False
+                driver.close()
+                driver.switch_to.window(original_window)
     else:
         print("Date does not match.")
 
@@ -121,4 +147,5 @@ if extracted_date:
         sleep(30)
 else:
     print("Date not found or extraction failed.")
-# web.quit()
+web.quit()
+# screenshot("23",'screenshots',' 11:24, 27.12.23')
