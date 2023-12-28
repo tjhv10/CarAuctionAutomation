@@ -71,15 +71,13 @@ def add0 (minute):
 # Function to automate button click
 count = 1
 def click_button_with_date(date, driver,count):
-    nowDate = " "+str(datetime.now().time().hour)+':'+str(add0(datetime.now().time().minute))+", "+ str(convert_date(str(datetime.today()).split(' ')[0]))
+    nowDate = " "+str(add0(datetime.now().time().hour))+':'+str(add0(datetime.now().time().minute))+", "+ str(convert_date(str(datetime.today()).split(' ')[0]))
     date = date.split(",")[2]+','+date.split(",")[1]
-    print(date)
-    print(nowDate)
     # sleep(1000)
-    nameOfOffice = driver.find_element(By.XPATH,'/html/body/div[1]/div/div/div[2]/div/div/div[2]/div/div[5]/div[1]/div[2]/div[2]/div/div[1]/div/div/div[4]/h2/span').text
-
-    print(nameOfOffice)
-    nowDate = date #check row for if the button is working
+    # nameOfOffice = driver.find_element(By.XPATH,'/html/body/div[1]/div/div/div[2]/div/div/div[2]/div/div[5]/div[1]/div[2]/div[2]/div/div[1]/div/div/div[4]/h2/span').text
+    #
+    # print(nameOfOffice)
+    # nowDate = date #check row for if the button is working
     if date == nowDate:
         original_window = driver.current_window_handle
         # Find and click the button (replace XPATH_OF_THE_BUTTON with the actual XPath of the button)
@@ -104,16 +102,26 @@ def click_button_with_date(date, driver,count):
         lowest_number = 10000000
         while flag:
             try:
-                while driver.find_element(By.XPATH, '/html/body/div[3]/div/div/div/div[1]/div[4]/div[5]/div[3]/div').text=="אין הצעות" :
+                try:
+                    while 'מתחילים'in driver.find_element(By.XPATH,'/html/body/div[3]/div/div/div/div[1]/div[3]/div[9]/div[3]').text:
+                        sleep(40)
+                        print("waiting")
+                except NoSuchElementException:
+                    print('oops')
+                    pass
+                # sleep(1000)
+                while driver.find_element(By.XPATH, '/html/body/div[3]/div/div/div/div[1]/div[4]/div[6]/div[3]/div').text=="אין הצעות" :
                     sleep(1)
-                    while driver.find_element(By.XPATH, '/html/body/div[3]/div/div/div/div[1]/div[4]/div[5]/div[2]/div[1]').text == "":
+                    while driver.find_element(By.XPATH, '/html/body/div[3]/div/div/div/div[1]/div[4]/div[6]/div[3]/div').text == "":
                         print("sleeping...")
                         sleep(0.5)
+                    sleep(2)
                     try:
                         name = driver.find_element(By.XPATH,'/html/body/div[3]/div/div/div/div[1]/div[3]/div[8]/div[2]/div[1]').text
                     except NoSuchElementException:
                         name = "1"
-                    number = int(extract_numbers(str(driver.find_element(By.XPATH, '/html/body/div[3]/div/div/div/div[1]/div[4]/div[5]/div[2]/div[1]').text)))
+
+                    number = int(extract_numbers(str(driver.find_element(By.XPATH, '/html/body/div[3]/div/div/div/div[1]/div[4]/div[6]/div[2]/div[1]').text)))
                     last_name = name
                     if number<lowest_number:
                         file_path = screenshot(extract_numbers(name),directory,date)
@@ -124,6 +132,8 @@ def click_button_with_date(date, driver,count):
                     if os.path.exists(file_path):
                         os.remove(file_path)
                         print(f"File '{file_path}' deleted successfully.")
+                    else:
+                        sleep(1)
 
             except NoSuchElementException:
                 print("Finished sale")
@@ -148,4 +158,3 @@ if extracted_date:
 else:
     print("Date not found or extraction failed.")
 web.quit()
-# screenshot("23",'screenshots',' 11:24, 27.12.23')
