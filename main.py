@@ -23,9 +23,9 @@ web.get(url)
 sleep(3)
 web.find_element(By.XPATH, '//*[@id="onetrust-reject-all-handler"]').click()
 
-for i in range(1, 20):
+for i in range(18, 21):
     print(i)
-    sleep(2)
+    sleep(5)
     web.find_element(By.XPATH, '//*[@id="mainView"]/div/div/div[2]/div/div/div[2]/div/div[5]/div[1]/div[2]/div[2]/div/div[' + str(i) + ']/div/div').click()
     sleep(3)
     try:
@@ -41,10 +41,10 @@ for i in range(1, 20):
             loyer = "None"
         try:
             sleep(3)
-            print(j)
             web.find_element(By.XPATH, '//*[@id="mainView"]/div/div/div[2]/div/div/div/div/div[2]/div[1]/div/div[1]/div['+str(j)+']/div[1]').click()
         except NoSuchElementException:
             sleep(3)
+            # todo find how to find the fowerd button
             try:
                 web.find_element(By.XPATH, '//*[@id="mainView"]/div/div/div[2]/div/div/div/div/div[2]/div[2]/div/a[6]').click()
             except:
@@ -145,6 +145,7 @@ for i in range(1, 20):
         except NoSuchElementException:
             pass
     web.back()
+    sleep(5)
 
 wb.save(excel_file)
 web.quit()
